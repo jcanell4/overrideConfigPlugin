@@ -27,7 +27,7 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
     //[START: IOC]
     var $needRefresh=false;
     var $allowedRefresh=true;
-    //[END: IOC] 
+    //[END: IOC]
 
     var $_file = PLUGIN_METADATA;
     var $_config = null;
@@ -65,7 +65,7 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
         }
         //[START: IOC]
         $this->needRefresh=false;
-        //[END: IOC] 
+        //[END: IOC]
         if ($this->_changed  && !$this->_error) {
             $this->_config->save_settings($this->getPluginName());
 
@@ -74,15 +74,15 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
 
             //[START: IOC]
             if($this->allowedRefresh){
-            //[END: IOC] 
+            //[END: IOC]
                 $this->_close_session();
                 send_redirect(wl($ID,array('do'=>'admin','page'=>'config'),true,'&'));
                 exit();
              //[START: IOC]
             }else{
-                $this->manager->forceRefresh();
+                $this->forceRefresh();
             }
-            //[END: IOC] 
+            //[END: IOC]
         } elseif(!$this->_error) {
             $this->_config->touch_settings(); // just touch to refresh cache
         }
@@ -389,9 +389,9 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
     function forceRefresh(){
         $this->needRefresh = true;
     }
-    
+
     function isRefreshNeeded(){
         return $this->needRefresh;
     }
-    //[END: IOC] 
+    //[END: IOC]
 }
