@@ -1,3 +1,7 @@
+/images/
+/lang/
+/settings/
+
 *
 
 !admin.php
