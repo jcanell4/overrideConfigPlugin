@@ -29,34 +29,40 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
     var $allowedRefresh=true;
     //[END: IOC]
 
-    var $_file = PLUGIN_METADATA;
-    var $_config = null;
-    var $_input = null;
-    var $_changed = false;          // set to true if configuration has altered
-    var $_error = false;
-    var $_session_started = false;
-    var $_localised_prompts = false;
+    protected $_file = PLUGIN_METADATA;
+    protected $_config = null;
+    protected $_input = null;
+    protected $_changed = false;          // set to true if configuration has altered
+    protected $_error = false;
+    protected $_session_started = false;
+    protected $_localised_prompts = false;
 
-    function getMenuSort() { return 100; }
+    public function getMenuSort() { return 100; }
 
     /**
      * handle user request
      */
-    function handle() {
+    public function handle() {
         global $ID, $INPUT;
 
-        if (!$this->_restore_session()) return $this->_close_session();
-        if ($INPUT->int('save') != 1) return $this->_close_session();
-        if (!checkSecurityToken()) return $this->_close_session();
+        if(!$this->_restore_session() || $INPUT->int('save') != 1 || !checkSecurityToken()) {
+            $this->_close_session();
+            return;
+        }
 
-        if (is_null($this->_config)) { $this->_config = new configuration($this->_file); }
+        if(is_null($this->_config)) {
+            $this->_config = new configuration($this->_file);
+        }
 
         // don't go any further if the configuration is locked
-        if ($this->_config->_locked) return $this->_close_session();
+        if($this->_config->locked) {
+            $this->_close_session();
+            return;
+        }
 
         $this->_input = $INPUT->arr('config');
 
-        while (list($key) = each($this->_config->setting)) {
+        foreach ($this->_config->setting as $key => $value){
             $input = isset($this->_input[$key]) ? $this->_input[$key] : null;
             if ($this->_config->setting[$key]->update($input)) {
                 $this->_changed = true;
@@ -93,7 +99,7 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
     /**
      * output appropriate html
      */
-    function html() {
+    public function html() {
         $allow_debug = $GLOBALS['conf']['allowdebug']; // avoid global $conf; here.
         global $lang;
         global $ID;
@@ -178,7 +184,9 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
 
         // show undefined settings list
         if ($allow_debug && !empty($undefined_settings)) {
-            function _setting_natural_comparison($a, $b) { return strnatcmp($a->_key, $b->_key); }
+            function _setting_natural_comparison($a, $b) {
+                return strnatcmp($a->_key, $b->_key);
+            }
             usort($undefined_settings, '_setting_natural_comparison');
             $this->_print_h1('undefined_settings', $this->getLang('_header_undefined'));
             ptln('<fieldset>');
@@ -221,7 +229,7 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
     /**
      * @return boolean   true - proceed with handle, false - don't proceed
      */
-    function _restore_session() {
+    protected function _restore_session() {
 
         // dokuwiki closes the session before act_dispatch. $_SESSION variables are all set,
         // however they can't be changed without starting the session again
@@ -247,11 +255,11 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
         return true;
     }
 
-    function _close_session() {
+    protected function _close_session() {
       if ($this->_session_started) session_write_close();
     }
 
-    function setupLocale($prompts=false) {
+    public function setupLocale($prompts=false) {
 
         parent::setupLocale();
         if (!$prompts || $this->_localised_prompts) return;
@@ -261,13 +269,13 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
 
     }
 
-    function _setup_localised_plugin_prompts() {
+    protected function _setup_localised_plugin_prompts() {
         global $conf;
 
         $langfile   = '/lang/'.$conf['lang'].'/settings.php';
         $enlangfile = '/lang/en/settings.php';
 
-        if ($dh = opendir(DOKU_PLUGIN)) {
+        if (($dh = opendir(DOKU_PLUGIN))) {
             while (false !== ($plugin = readdir($dh))) {
                 if ($plugin == '.' || $plugin == '..' || $plugin == 'tmp' || $plugin == 'config') continue;
                 if (is_file(DOKU_PLUGIN.$plugin)) continue;
@@ -313,10 +321,10 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
 
     /**
      * Generates a two-level table of contents for the config plugin.
-     *
      * @author Ben Coburn <btcoburn@silicodon.net>
+     * @return array
      */
-    function getTOC() {
+    public function getTOC() {
         if (is_null($this->_config)) { $this->_config = new configuration($this->_file); }
         $this->setupLocale(true);
 
@@ -368,7 +376,7 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
         return $t;
     }
 
-    function _print_h1($id, $text) {
+    protected function _print_h1($id, $text) {
         ptln('<h1 id="'.$id.'">'.$text.'</h1>');
     }
 
