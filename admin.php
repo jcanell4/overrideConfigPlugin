@@ -29,6 +29,7 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
     var $allowedRefresh=true;
     //[END: IOC]
 
+    //[START: IOC]
     protected $_file = PLUGIN_METADATA;
     protected $_config = null;
     protected $_input = null;
@@ -36,6 +37,8 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
     protected $_error = false;
     protected $_session_started = false;
     protected $_localised_prompts = false;
+    
+    
 
     public function getMenuSort() { return 100; }
 
@@ -59,10 +62,13 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
             $this->_close_session();
             return;
         }
+        //[END: IOC]
 
         $this->_input = $INPUT->arr('config');
 
+        //[START: IOC]
         foreach ($this->_config->setting as $key => $value){
+        //[END: IOC]
             $input = isset($this->_input[$key]) ? $this->_input[$key] : null;
             if ($this->_config->setting[$key]->update($input)) {
                 $this->_changed = true;
@@ -99,7 +105,9 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
     /**
      * output appropriate html
      */
+    //[START: IOC]
     public function html() {
+    //[END: IOC]
         $allow_debug = $GLOBALS['conf']['allowdebug']; // avoid global $conf; here.
         global $lang;
         global $ID;
@@ -184,9 +192,11 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
 
         // show undefined settings list
         if ($allow_debug && !empty($undefined_settings)) {
+            //[START: IOC]
             function _setting_natural_comparison($a, $b) {
                 return strnatcmp($a->_key, $b->_key);
             }
+            //[END: IOC]
             usort($undefined_settings, '_setting_natural_comparison');
             $this->_print_h1('undefined_settings', $this->getLang('_header_undefined'));
             ptln('<fieldset>');
@@ -229,7 +239,9 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
     /**
      * @return boolean   true - proceed with handle, false - don't proceed
      */
+    //[START: IOC]
     protected function _restore_session() {
+    //[END: IOC]
 
         // dokuwiki closes the session before act_dispatch. $_SESSION variables are all set,
         // however they can't be changed without starting the session again
@@ -255,11 +267,15 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
         return true;
     }
 
+    //[START: IOC]
     protected function _close_session() {
+    //[END: IOC]
       if ($this->_session_started) session_write_close();
     }
 
+    //[START: IOC]
     public function setupLocale($prompts=false) {
+    //[END: IOC]
 
         parent::setupLocale();
         if (!$prompts || $this->_localised_prompts) return;
@@ -269,13 +285,17 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
 
     }
 
+    //[START: IOC]
     protected function _setup_localised_plugin_prompts() {
+    //[END: IOC]
         global $conf;
 
         $langfile   = '/lang/'.$conf['lang'].'/settings.php';
         $enlangfile = '/lang/en/settings.php';
 
+        //[START: IOC]
         if (($dh = opendir(DOKU_PLUGIN))) {
+        //[END: IOC]
             while (false !== ($plugin = readdir($dh))) {
                 if ($plugin == '.' || $plugin == '..' || $plugin == 'tmp' || $plugin == 'config') continue;
                 if (is_file(DOKU_PLUGIN.$plugin)) continue;
@@ -319,12 +339,14 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
         return true;
     }
 
+    //[START: IOC]
     /**
      * Generates a two-level table of contents for the config plugin.
      * @author Ben Coburn <btcoburn@silicodon.net>
      * @return array
      */
     public function getTOC() {
+    //[END: IOC]
         if (is_null($this->_config)) { $this->_config = new configuration($this->_file); }
         $this->setupLocale(true);
 
@@ -376,7 +398,9 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
         return $t;
     }
 
+    //[START: IOC]
     protected function _print_h1($id, $text) {
+    //[END: IOC]
         ptln('<h1 id="'.$id.'">'.$text.'</h1>');
     }
 
