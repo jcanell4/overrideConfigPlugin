@@ -226,8 +226,8 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
 
         if (!$this->_config->locked) {
             ptln('  <input type="hidden" name="save"   value="1" />');
-            ptln('  <input type="submit" name="submit" class="button" value="'.$lang['btn_save'].'" accesskey="s" />');
-            ptln('  <input type="reset" class="button" value="'.$lang['btn_reset'].'" />');
+            ptln('  <button type="submit" name="submit" accesskey="s">'.$lang['btn_save'].'</button>');
+            ptln('  <button type="reset">'.$lang['btn_reset'].'</button>');
         }
 
         ptln('</p>');
@@ -371,8 +371,10 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
 
         // build toc
         $t = array();
+        $check = false;
+        $title = $this->getLang('_configuration_manager');
 
-        $t[] = html_mktocitem('configuration_manager', $this->getLang('_configuration_manager'), 1);
+        $t[] = html_mktocitem(sectionID($title, $check), $title, 1);
         $t[] = html_mktocitem('dokuwiki_settings', $this->getLang('_header_dokuwiki'), 1);
         foreach($toc['conf'] as $setting) {
             $name = $setting->prompt($this);
@@ -404,6 +406,14 @@ class admin_plugin_config extends DokuWiki_Admin_Plugin {
         ptln('<h1 id="'.$id.'">'.$text.'</h1>');
     }
 
+
+    /**
+     * Adds a translation to this plugin's language array
+     */
+    public function addLang($key, $value) {
+        if (!$this->localised) $this->setupLocale();
+        $this->lang[$key] = $value;
+    }
 
     //[START: IOC]
     function setAllowedRefresh($value=true){
